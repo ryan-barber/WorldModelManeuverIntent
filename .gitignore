@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+.venv/
+venv/
+artifacts/
+data/raw/
+data/processed/
+third_party/TCN/*
+!third_party/TCN/LICENSE
+!third_party/TCN/README.md
+!third_party/TCN/TCN/
+third_party/TCN/TCN/*
+!third_party/TCN/TCN/__init__.py
+!third_party/TCN/TCN/tcn.py

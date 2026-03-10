@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rso-world-model"
+version = "0.1.0"
+description = "RSO maneuver behavior and intent world model built on a Temporal Convolutional Network."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Ryan Barber" }
+]
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.2",
+  "pyyaml>=6.0",
+  "requests>=2.32",
+  "torch>=2.2",
+  "sgp4>=2.23",
+  "skyfield>=1.49",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2",
+]
+export = [
+  "onnx>=1.16",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
