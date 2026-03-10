@@ -21,6 +21,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--stride", type=int, default=16, help="Sliding window stride.")
     parser.add_argument("--prediction-horizon-steps", type=int, default=16, help="Lookahead steps for labels.")
     parser.add_argument("--ephemeris-path", default=None, help="Optional local Skyfield ephemeris file.")
+    parser.add_argument(
+        "--position-residual-threshold-km",
+        type=float,
+        default=25.0,
+        help="Residual threshold in kilometers for flagging a maneuver event.",
+    )
+    parser.add_argument(
+        "--velocity-residual-threshold-m-s",
+        type=float,
+        default=2.5,
+        help="Velocity residual threshold in m/s for flagging a maneuver event.",
+    )
     return parser.parse_args()
 
 
@@ -77,12 +89,21 @@ def main() -> None:
     from rso_world_model.data.satcat import load_satcat_metadata
     from rso_world_model.data.schemas import PreparedSequence
     from rso_world_model.features.builder import FeatureBuilderConfig, WorldModelFeatureBuilder
+    from rso_world_model.features.maneuvers import ManeuverDetectionConfig
     from rso_world_model.training.windowing import make_window_samples
 
     spacetrack_dir = Path(args.spacetrack_dir)
     celestrak_dir = Path(args.celestrak_dir)
     satcat = load_satcat_metadata(args.satcat_path) if Path(args.satcat_path).exists() else {}
-    builder = WorldModelFeatureBuilder(FeatureBuilderConfig(ephemeris_path=Path(args.ephemeris_path) if args.ephemeris_path else None))
+    builder = WorldModelFeatureBuilder(
+        FeatureBuilderConfig(
+            ephemeris_path=Path(args.ephemeris_path) if args.ephemeris_path else None,
+            maneuver_detection=ManeuverDetectionConfig(
+                position_residual_threshold_km=args.position_residual_threshold_km,
+                velocity_residual_threshold_m_s=args.velocity_residual_threshold_m_s,
+            ),
+        )
+    )
 
     sources = _load_sequence_sources(spacetrack_dir, celestrak_dir)
     output_dir = Path(args.output_dir)

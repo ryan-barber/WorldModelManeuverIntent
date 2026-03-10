@@ -42,14 +42,22 @@ class SpaceTrackClient:
         )
         response.raise_for_status()
 
-    def fetch_gp_history(self, norad_cat_id: int) -> list[dict]:
-        query = (
-            f"{SPACE_TRACK_QUERY_ROOT}/class/gp_history/NORAD_CAT_ID/{norad_cat_id}/"
-            "orderby/EPOCH asc/format/json"
-        )
-        response = self.session.get(query, timeout=self.timeout_s)
+    def _fetch_query_json(self, query_path: str) -> list[dict]:
+        response = self.session.get(f"{SPACE_TRACK_QUERY_ROOT}/{query_path}", timeout=self.timeout_s)
         response.raise_for_status()
         return response.json()
+
+    def fetch_gp_history(self, norad_cat_id: int) -> list[dict]:
+        return self._fetch_query_json(f"class/gp_history/NORAD_CAT_ID/{norad_cat_id}/orderby/EPOCH asc/format/json")
+
+    def fetch_gp_history_batch(self, norad_cat_ids: Iterable[int]) -> list[dict]:
+        joined_ids = ",".join(str(int(norad_cat_id)) for norad_cat_id in norad_cat_ids)
+        return self._fetch_query_json(
+            f"class/gp_history/NORAD_CAT_ID/{joined_ids}/orderby/NORAD_CAT_ID asc/EPOCH asc/format/json"
+        )
+
+    def fetch_current_gp(self) -> list[dict]:
+        return self._fetch_query_json("class/gp/decay_date/null-val/orderby/NORAD_CAT_ID asc/format/json")
 
     def download_gp_history_cache(self, norad_cat_ids: Iterable[int], output_dir: str | Path) -> list[Path]:
         ensure_dir(output_dir)
@@ -62,3 +70,9 @@ class SpaceTrackClient:
             written_paths.append(target)
         return written_paths
 
+    def download_current_gp_cache(self, output_path: str | Path) -> Path:
+        self.login()
+        payload = self.fetch_current_gp()
+        target = Path(output_path)
+        write_json(target, payload)
+        return target

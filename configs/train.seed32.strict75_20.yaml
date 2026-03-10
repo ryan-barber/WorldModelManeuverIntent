@@ -1,0 +1,42 @@
+data:
+  manifest_path: data/processed/train_windows_strict75_20/manifest.json
+  batch_size: 32
+  num_workers: 0
+  validation_split: 0.1
+
+model:
+  sequence_input_dim: 71
+  static_input_dim: 16
+  input_projection_dim: 64
+  temporal_channels: [64, 64, 96, 96, 128]
+  kernel_size: 3
+  dropout: 0.1
+  static_hidden_dim: 32
+  head_hidden_dim: 128
+  maneuver_class_count: 6
+  maneuver_purpose_count: 5
+  delta_v_bucket_count: 5
+
+training:
+  epochs: 5
+  learning_rate: 0.0005
+  weight_decay: 0.0001
+  grad_clip_norm: 1.0
+  mixed_precision: false
+  device: cpu
+  checkpoint_dir: artifacts/checkpoints/seed32_strict75_20
+  log_every: 20
+  seed: 7
+  loss_weights:
+    maneuver_probability: 1.0
+    next_maneuver_time: 0.5
+    maneuver_class: 1.0
+    maneuver_purpose: 1.0
+    delta_v_bucket: 0.75
+    remaining_delta_v_estimate: 0.25
+    residual_growth: 0.25
+
+export:
+  opset: 17
+  output_path: artifacts/export/rso_world_model_seed32_strict75_20.onnx
+

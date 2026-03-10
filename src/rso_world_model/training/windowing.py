@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 
 import numpy as np
 
@@ -71,13 +72,8 @@ def make_window_samples(
 
         next_time_s = -1.0
         if next_event is not None:
-            current_epoch = window_timestamps[-1]
-            next_time_s = max(
-                0.0,
-                (
-                    np.datetime64(next_event.event_epoch.isoformat()) - np.datetime64(current_epoch)
-                ).astype("timedelta64[s]").astype(np.int64),
-            )
+            current_epoch = datetime.fromisoformat(window_timestamps[-1])
+            next_time_s = max(0.0, (next_event.event_epoch - current_epoch).total_seconds())
 
         remaining_delta_v = float(sequence.sequence_features[end - 1, -1])
         residual_growth = float(sequence.sequence_features[end - 1, 58])
@@ -116,4 +112,3 @@ def make_window_samples(
             )
         )
     return samples
-
