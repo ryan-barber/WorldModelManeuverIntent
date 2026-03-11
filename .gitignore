@@ -6,6 +6,7 @@ __pycache__/
 venv/
 *.egg-info/
 artifacts/
+downloads/
 data/raw/
 data/processed/
 third_party/TCN/*
