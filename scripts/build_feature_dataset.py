@@ -43,7 +43,9 @@ def _load_sequence_sources(spacetrack_dir: Path, celestrak_dir: Path) -> dict[in
 
     for path in sorted(spacetrack_dir.glob("*.json")):
         payload = read_json(path)
-        if not payload:
+        if not isinstance(payload, list) or not payload:
+            continue
+        if not isinstance(payload[0], dict) or "NORAD_CAT_ID" not in payload[0]:
             continue
         norad_cat_id = int(payload[0]["NORAD_CAT_ID"])
         merged[norad_cat_id] = ("spacetrack", payload)
@@ -86,6 +88,7 @@ def _save_window(path: Path, sample) -> None:
 
 def main() -> None:
     args = parse_args()
+    from rso_world_model.data.io import ensure_dir
     from rso_world_model.data.satcat import load_satcat_metadata
     from rso_world_model.data.schemas import PreparedSequence
     from rso_world_model.features.builder import FeatureBuilderConfig, WorldModelFeatureBuilder
@@ -106,7 +109,7 @@ def main() -> None:
     )
 
     sources = _load_sequence_sources(spacetrack_dir, celestrak_dir)
-    output_dir = Path(args.output_dir)
+    output_dir = ensure_dir(args.output_dir)
     manifest = []
 
     for norad_cat_id, (source, rows) in sorted(sources.items()):

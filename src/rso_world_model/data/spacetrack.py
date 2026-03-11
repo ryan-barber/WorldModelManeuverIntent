@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Iterable
 
@@ -54,6 +55,20 @@ class SpaceTrackClient:
         joined_ids = ",".join(str(int(norad_cat_id)) for norad_cat_id in norad_cat_ids)
         return self._fetch_query_json(
             f"class/gp_history/NORAD_CAT_ID/{joined_ids}/orderby/NORAD_CAT_ID asc/EPOCH asc/format/json"
+        )
+
+    def fetch_gp_history_epoch_range(self, start_date: str | date, end_date: str | date) -> list[dict]:
+        start = start_date.isoformat() if isinstance(start_date, date) else str(start_date)
+        end = end_date.isoformat() if isinstance(end_date, date) else str(end_date)
+        return self._fetch_query_json(
+            f"class/gp_history/EPOCH/{start}--{end}/orderby/NORAD_CAT_ID,EPOCH/format/json/emptyresult/show"
+        )
+
+    def fetch_gp_history_creation_range(self, start_date: str | date, end_date: str | date) -> list[dict]:
+        start = start_date.isoformat() if isinstance(start_date, date) else str(start_date)
+        end = end_date.isoformat() if isinstance(end_date, date) else str(end_date)
+        return self._fetch_query_json(
+            f"class/gp_history/CREATION_DATE/{start}--{end}/orderby/NORAD_CAT_ID,EPOCH/format/json/emptyresult/show"
         )
 
     def fetch_current_gp(self) -> list[dict]:
